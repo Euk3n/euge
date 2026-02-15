@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso a Datos: AMISTAD.exe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* --- Estilos Futuristas / Cyber-Kawaii --- */
+        :root {
+            --neon-purple: #b500ff; /* Morado brillante */
+            --neon-pink: #ff00ea; /* Rosa para contrastar */
+            --dark-bg: #0b0014; /* Fondo oscuro con tono morado */
+            --terminal-text: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #1a002a 0%, #000000 100%),
+                repeating-linear-gradient(transparent 0px, transparent 2px, rgba(181, 0, 255, 0.05) 3px);
+            background-size: cover, auto;
+            color: var(--terminal-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden; 
+        }
+
+        /* --- Efecto de la Rosa Mística (Más grande) --- */
+        .magic-flower {
+            font-size: 6rem; /* Aumentado de 4rem a 6rem */
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-purple);
+            animation: levitate-glow 3s infinite alternate ease-in-out;
+            z-index: 2;
+        }
+
+        @keyframes levitate-glow {
+            0% { transform: translateY(0) scale(1) rotate(-5deg); filter: hue-rotate(0deg); }
+            100% { transform: translateY(-15px) scale(1.1) rotate(5deg); filter: hue-rotate(30deg); }
+        }
+
+        h1 {
+            font-weight: normal;
+            margin-top: 0;
+            margin-bottom: 50px;
+            color: var(--neon-purple);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(181, 0, 255, 0.8), 0 0 20px rgba(181, 0, 255, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+
+        h1::before, h1::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--dark-bg);
+        }
+        h1::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--neon-purple);
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        h1::after {
+            left: -2px;
+            text-shadow: -2px 0 #00f7ff;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        /* --- Lluvia de Corazones --- */
+        .falling-heart {
+            position: absolute;
+            top: -10vh;
+            font-size: 1.2rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px var(--neon-purple);
+            z-index: 1; 
+            pointer-events: none; 
+            animation: fall linear forwards;
+            opacity: 0.7;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* --- Contenedor de Nodos --- */
+        .data-nodes-container {
+            display: flex; /* Se ocultará con JS al final */
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            z-index: 5;
+            transition: opacity 0.5s ease;
+        }
+
+        .data-node {
+            width: 160px;
+            height: 160px;
+            background-color: rgba(15, 0, 25, 0.8);
+            border: 2px solid var(--neon-purple);
+            box-shadow: 
+                0 0 15px rgba(181, 0, 255, 0.3),
+                inset 0 0 20px rgba(181, 0, 255, 0.1);
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+        }
+
+        .data-node:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 30px rgba(181, 0, 255, 0.8),
+                inset 0 0 30px rgba(181, 0, 255, 0.3);
+            background-color: rgba(181, 0, 255, 0.1);
+        }
+        
+        /* Estilo para nodo ya leído */
+        .data-node.read {
+             border-color: var(--neon-pink);
+             color: var(--neon-pink);
+        }
+        .data-node.read .node-icon {
+             color: var(--neon-pink);
+             text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+
+        .node-icon {
+            font-size: 3rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px var(--neon-purple);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .node-label {
+            font-size: 0.8rem;
+            color: inherit;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- Pantalla Holográfica (Modal) --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.90);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .hologram-screen {
+            background: rgba(15, 0, 25, 0.95);
+            padding: 40px;
+            max-width: 600px;
+            width: 85%;
+            border: 2px solid var(--neon-purple);
+            box-shadow: 
+                0 0 40px rgba(181, 0, 255, 0.5),
+                inset 0 0 50px rgba(181, 0, 255, 0.2);
+            text-align: left;
+            line-height: 1.6;
+            position: relative;
+            animation: turnOn 0.5s ease forwards;
+            overflow: hidden;
+        }
+
+        .hologram-screen::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(181, 0, 255, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #letterText h3 {
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--neon-purple);
+            display: inline-block;
+            padding-bottom: 5px;
+            text-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+            transition: transform 0.3s;
+            z-index: 10;
+        }
+
+        .close-btn:hover { transform: rotate(90deg) scale(1.2); }
+
+        /* --- Mensaje Final --- */
+        .final-message-container {
+            display: none; /* Oculto al inicio */
+            text-align: center;
+            z-index: 10;
+            animation: fadeInSlow 2s ease forwards;
+        }
+
+        .final-message-text {
+            font-size: 3rem;
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            padding: 20px;
+            border: 3px solid var(--neon-pink);
+            box-shadow: 0 0 30px var(--neon-pink), inset 0 0 20px var(--neon-pink);
+            animation: pulse-final 1.5s infinite alternate;
+        }
+
+        /* Animaciones */
+        @keyframes turnOn {
+            0% { transform: scaleX(0) scaleY(0.05); opacity: 0; filter: brightness(5); }
+            50% { transform: scaleX(1) scaleY(0.05); opacity: 1; filter: brightness(3); }
+            100% { transform: scaleX(1) scaleY(1); opacity: 1; filter: brightness(1); }
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(20px, 9999px, 15px, 0); transform: skew(2deg); }
+            5%, 100% { clip: rect(0, 0, 0, 0); transform: skew(0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); transform: skew(-2deg); }
+            5%, 100% { clip: rect(0, 0, 0, 0); transform: skew(0); }
+        }
+        @keyframes fadeInSlow {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-final {
+            from { text-shadow: 0 0 10px var(--neon-pink); box-shadow: 0 0 20px var(--neon-pink); }
+            to { text-shadow: 0 0 30px var(--neon-pink), 0 0 10px #fff; box-shadow: 0 0 50px var(--neon-pink); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="magic-flower">🌹</div>
+
+    <h1 data-text="Protocolo: B.F.F.">Protocolo: B.F.F.</h1>
+
+    <div class="data-nodes-container" id="nodesContainer">
+        <div class="data-node" id="node1" onclick="accessData('part1', 'node1')">
+            <div class="node-icon" id="icon-node1">◈</div>
+            <span class="node-label">[ARCHIVO 001]</span>
+        </div>
+        <div class="data-node" id="node2" onclick="accessData('part2', 'node2')">
+            <div class="node-icon" id="icon-node2">◈</div>
+            <span class="node-label">[ARCHIVO 002]</span>
+        </div>
+        <div class="data-node" id="node3" onclick="accessData('part3', 'node3')">
+            <div class="node-icon" id="icon-node3">◈</div>
+            <span class="node-label">[ARCHIVO 003]</span>
+        </div>
+    </div>
+
+    <div id="hologramModal" class="modal">
+        <div class="hologram-screen">
+            <span class="close-btn" onclick="closeStream()">[X] CERRAR</span>
+            <div id="letterText" style="position: relative; z-index: 2;"></div>
+        </div>
+    </div>
+
+    <div id="finalMessage" class="final-message-container">
+        <h2 class="final-message-text">¡Feliz Día Parejita! <br>💖</h2>
+    </div>
+
+    <script>
+        // --- Generador de Lluvia de Corazones ---
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.animationDuration = Math.random() * 3 + 3 + "s";
+            heart.innerHTML = Math.random() > 0.5 ? '💜' : '💖'; 
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 6000);
+        }
+        setInterval(createHeart, 300);
+
+        // --- Lógica de la Carta y Mensaje Final ---
+        
+        // Rastreador de qué partes se han abierto
+        let openedStates = {
+            part1: false,
+            part2: false,
+            part3: false
+        };
+
+        const dataStreams = {
+            part1: "<h3>> INICIANDO SISTEMA...</h3><p> Hay amistades que empiezan fácil.La nuestra no. Nos caíamos mal, nos juzgamos sin conocernos… y aun así la vida insistió en sentarnos una frente a la otra hasta que por fin conectamos..</p>",
+            part2: "<h3>> ANÁLISIS DE SUJETO</h3><p>Eres una fuerza imparable. Admiro tu capacidad de procesamiento ante los problemas y la energía que irradias. Gracias por ser mi respaldo siempre.</p>",
+            part3: "<h3>> PROTOCOLO: ETERNO</h3><p>Sin importar en que coordenadas del mundo estemos, esta conexión es inquebrantable. Siempre tendrás mi señal de ayuda disponible 24/7. ¡Feliz 14 de Febrero, Dianita!</p>"
+        };
+
+        const modal = document.getElementById('hologramModal');
+        const textContainer = document.getElementById('letterText');
+        const nodesContainer = document.getElementById('nodesContainer');
+        const finalMessageDiv = document.getElementById('finalMessage');
+
+        // Función para abrir el nodo
+        function accessData(part, nodeId) {
+            // Mostrar el texto
+            textContainer.innerHTML = dataStreams[part];
+            modal.style.display = 'flex';
+            
+            // Marcar como leído en el estado
+            openedStates[part] = true;
+            
+            // Cambiar visualmente el nodo a "leído" (Checkmark rosa)
+            const nodeElement = document.getElementById(nodeId);
+            const iconElement = document.getElementById('icon-' + nodeId);
+            nodeElement.classList.add('read');
+            iconElement.innerHTML = "✓"; 
+        }
+
+        // Función para cerrar la pantalla y verificar si terminó
+        function closeStream() {
+            modal.style.display = 'none';
+            checkForFinalSurprise();
+        }
+
+        // Función que verifica si ya abrió los 3
+        function checkForFinalSurprise() {
+            // Si las 3 partes son verdaderas (true)
+            if (openedStates.part1 && openedStates.part2 && openedStates.part3) {
+                // Ocultamos los nodos suavemente
+                nodesContainer.style.opacity = '0';
+                // Esperamos medio segundo y mostramos el mensaje final
+                setTimeout(() => {
+                    nodesContainer.style.display = 'none';
+                    finalMessageDiv.style.display = 'block';
+                }, 500);
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeStream();
+            }
+        }
+    </script>
+</body>
+</html>
